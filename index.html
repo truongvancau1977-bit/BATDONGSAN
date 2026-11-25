@@ -13,8 +13,12 @@
   <script src="./knowledge.js"></script>
   <style>
     html, body {
+      position: fixed;
+      inset: 0;
+      width: 100%;
       height: 100dvh;
       overflow: hidden;
+      overscroll-behavior: none;
       background-color: #0f172a;
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -64,20 +68,20 @@
 <body class="flex flex-col">
 
   <!-- Header -->
-  <header class="bg-slate-900/95 border-b border-slate-800 px-3 py-2.5 flex items-center justify-between shrink-0 z-20">
-    <div class="flex items-center gap-2.5 min-w-0">
+  <header class="bg-slate-900/95 border-b border-slate-800 px-3 pb-2.5 pt-[calc(0.65rem+env(safe-area-inset-top))] flex items-center justify-between gap-2 shrink-0 z-20">
+    <div class="flex items-center gap-2 min-w-0 flex-1">
       <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-sm shrink-0 shadow-lg shadow-blue-900/40">
         BĐS
       </div>
-      <div class="min-w-0">
-        <div class="text-xs text-slate-400 font-medium leading-none mb-1">Google AI Studio Agent</div>
-        <select id="projectSelect" class="bg-slate-800 text-slate-100 text-sm font-semibold rounded-lg px-2 py-1 border border-slate-700 focus:outline-none focus:border-blue-500 max-w-[210px] truncate">
+      <div class="min-w-0 flex-1">
+        <div class="text-[11px] text-slate-400 font-medium leading-none mb-1 truncate">Gemini 3.5 Flash-Lite</div>
+        <select id="projectSelect" class="bg-slate-800 text-slate-100 text-sm font-semibold rounded-lg px-2 py-1 border border-slate-700 focus:outline-none focus:border-blue-500 w-full max-w-[200px] truncate">
         </select>
       </div>
     </div>
 
-    <div class="flex items-center gap-1.5">
-      <button onclick="clearChat()" title="Cuộc trò chuyện mới" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">
+    <div class="flex items-center gap-1.5 shrink-0">
+      <button onclick="clearChat()" title="Cuộc trò chuyện mới" class="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium whitespace-nowrap">
         🗑️ Mới
       </button>
       <button onclick="openSettings()" title="Cài đặt API Key" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 relative">
