@@ -172,6 +172,11 @@
     const STORAGE_KEY = "bds_agent_api_key";
     const MODEL_KEY = "bds_agent_model";
     const PROJECT_KEY = "bds_agent_project";
+    const DEFAULT_API_KEY = "AQ.Ab8RN6Lr0rRiPQxW2qsNOLcybEF83-ghanCwS5fpdiOi16llMA";
+
+    function getApiKey() {
+      return localStorage.getItem(STORAGE_KEY) || DEFAULT_API_KEY;
+    }
 
     let chatHistory = [];
     let isLoading = false;
@@ -210,7 +215,7 @@
     }
 
     function checkApiKeyBadge() {
-      const hasKey = !!localStorage.getItem(STORAGE_KEY);
+      const hasKey = !!getApiKey();
       document.getElementById("keyBadge").classList.toggle("hidden", hasKey);
     }
 
@@ -222,7 +227,7 @@
 
     function renderWelcome() {
       const proj = getCurrentKnowledge();
-      const hasKey = !!localStorage.getItem(STORAGE_KEY);
+      const hasKey = !!getApiKey();
       chatContainer.innerHTML = `
         <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 space-y-2.5 text-sm">
           <div class="flex items-center gap-2 font-bold text-blue-400">
@@ -251,7 +256,7 @@
     }
 
     function openSettings() {
-      document.getElementById("apiKeyInput").value = localStorage.getItem(STORAGE_KEY) || "";
+      document.getElementById("apiKeyInput").value = getApiKey();
       document.getElementById("modelSelect").value = "gemini-3.5-flash-lite";
       document.getElementById("settingsModal").classList.remove("hidden");
     }
@@ -329,7 +334,7 @@
       const text = userInput.value.trim();
       if (!text) return;
 
-      const apiKey = localStorage.getItem(STORAGE_KEY);
+      const apiKey = getApiKey();
       if (!apiKey) {
         openSettings();
         return;
