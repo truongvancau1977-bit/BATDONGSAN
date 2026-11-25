@@ -392,7 +392,12 @@ ${proj.content}`;
         loadingBubble.innerHTML = marked.parse(reply);
       } catch (err) {
         chatHistory.pop();
-        loadingBubble.innerHTML = `<span class="text-red-400">❌ Lỗi kết nối Google AI Studio: ${err.message}</span>`;
+        const keyHint = apiKey ? `${apiKey.slice(0, 12)}...` : "trống";
+        loadingBubble.innerHTML = `<div class="text-red-400 space-y-2">
+          <div>❌ Lỗi kết nối Google AI Studio: ${err.message}</div>
+          <div class="text-xs text-slate-400">Key đang dùng: <code>${keyHint}</code></div>
+          <button onclick="openSettings()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg">⚙️ Kiểm tra / Đổi API Key</button>
+        </div>`;
       } finally {
         isLoading = false;
         document.getElementById("sendBtn").disabled = false;
