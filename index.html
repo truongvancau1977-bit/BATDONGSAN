@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Trợ Lý QLDA BĐS - Mobile Agent</title>
+  <link rel="manifest" href="./manifest.json" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="./knowledge.js"></script>
+  <style>
+    html, body {
+      height: 100dvh;
+      overflow: hidden;
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .prose-chat table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 0.82rem;
+    }
+    .prose-chat th, .prose-chat td {
+      border: 1px solid #334155;
+      padding: 6px 10px;
+      text-align: left;
+    }
+    .prose-chat th {
+      background-color: #1e293b;
+      color: #93c5fd;
+      font-weight: 600;
+    }
+    .prose-chat h1, .prose-chat h2, .prose-chat h3 {
+      font-weight: 700;
+      color: #60a5fa;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+    .prose-chat ul, .prose-chat ol {
+      padding-left: 1.2rem;
+      margin: 4px 0;
+      list-style-type: disc;
+    }
+    .prose-chat p { margin: 4px 0; line-height: 1.5; }
+    .prose-chat strong { color: #f8fafc; }
+    .prose-chat code {
+      background: #1e293b;
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #fbbf24;
+    }
+  </style>
+</head>
+<body class="flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-slate-900/95 border-b border-slate-800 px-3 py-2.5 flex items-center justify-between shrink-0 z-20">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-sm shrink-0 shadow-lg shadow-blue-900/40">
+        BĐS
+      </div>
+      <div class="min-w-0">
+        <div class="text-xs text-slate-400 font-medium leading-none mb-1">Google AI Studio Agent</div>
+        <select id="projectSelect" class="bg-slate-800 text-slate-100 text-sm font-semibold rounded-lg px-2 py-1 border border-slate-700 focus:outline-none focus:border-blue-500 max-w-[210px] truncate">
+        </select>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5">
+      <button onclick="clearChat()" title="Cuộc trò chuyện mới" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">
+        🗑️ Mới
+      </button>
+      <button onclick="openSettings()" title="Cài đặt API Key" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 relative">
+        ⚙️
+        <span id="keyBadge" class="hidden absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Chat Messages Area -->
+  <main id="chatContainer" class="flex-1 overflow-y-auto px-3 py-4 space-y-4 scroll-smooth">
+    <!-- Welcome message injected by JS -->
+  </main>
+
+  <!-- Quick Commands Bar -->
+  <div class="bg-slate-900/90 border-t border-slate-800/80 px-3 py-2 flex gap-2 overflow-x-auto no-scrollbar shrink-0">
+    <button onclick="sendQuick('Tóm tắt trạng thái pháp lý hiện tại và các đầu việc gấp cần làm ngay')" class="shrink-0 text-xs bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700 px-3 py-1.5 rounded-full">
+      📊 Tiến độ & Việc gấp
+    </button>
+    <button onclick="sendQuick('Tổng hợp chi tiết cơ cấu quy hoạch 1/500 và số lượng lô đất các loại')" class="shrink-0 text-xs bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 px-3 py-1.5 rounded-full">
+      📐 Quy hoạch 1/500
+    </button>
+    <button onclick="sendQuick('Liệt kê các văn bản pháp lý quan trọng nhất trong kho DATA kèm số hiệu và ngày ban hành')" class="shrink-0 text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-3 py-1.5 rounded-full">
+      📑 Tra cứu văn bản
+    </button>
+    <button onclick="sendQuick('Phân tích các nút thắt pháp lý đã xử lý và lưu ý rủi ro khi trình Chấp thuận chủ trương đầu tư')" class="shrink-0 text-xs bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700 px-3 py-1.5 rounded-full">
+      ⚠️ Rủi ro & Pháp lý
+    </button>
+    <button onclick="sendQuick('Soạn giúp tôi dự thảo công văn đôn đốc / báo cáo tiến độ dựa trên hồ sơ dự án')" class="shrink-0 text-xs bg-slate-800 hover:bg-slate-700 text-pink-300 border border-slate-700 px-3 py-1.5 rounded-full">
+      ✍️ Soạn công văn
+    </button>
+  </div>
+
+  <!-- Input Area -->
+  <footer class="bg-slate-900 border-t border-slate-800 p-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] shrink-0">
+    <form id="chatForm" onsubmit="handleSubmit(event)" class="flex items-end gap-2">
+      <button type="button" id="micBtn" onclick="toggleVoice()" title="Ra lệnh bằng giọng nói" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 shrink-0 transition">
+        🎙️
+      </button>
+      <textarea
+        id="userInput"
+        rows="1"
+        placeholder="Nhập lệnh cho Agent dự án..."
+        class="flex-1 bg-slate-800 text-slate-100 placeholder-slate-400 text-sm rounded-xl px-3.5 py-2.5 border border-slate-700 focus:outline-none focus:border-blue-500 resize-none max-h-32"
+        oninput="autoResize(this)"
+        onkeydown="handleKeyDown(event)"
+      ></textarea>
+      <button type="submit" id="sendBtn" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-sm shrink-0 transition">
+        Gửi
+      </button>
+    </form>
+  </footer>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-white">⚙️ Cấu hình Google AI Studio</h2>
+        <button onclick="closeSettings()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Google AI Studio API Key</label>
+          <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+          <a href="https://aistudio.google.com/apikey" target="_blank" class="inline-block mt-1.5 text-xs text-blue-400 underline">
+            👉 Lấy API Key miễn phí tại Google AI Studio
+          </a>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Model Gemini (Cố định)</label>
+          <select id="modelSelect" disabled class="w-full bg-slate-800/70 border border-slate-700 rounded-xl px-3 py-2 text-sm text-emerald-400 font-medium cursor-not-allowed">
+            <option value="gemini-3.5-flash-lite" selected>Gemini 3.5 Flash-Lite (gemini-3.5-flash-lite)</option>
+          </select>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800">
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nạp file .md cập nhật nóng (tùy chọn)</label>
+          <input id="mdFileInput" type="file" accept=".md,.txt" onchange="loadCustomMd(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-blue-400 hover:file:bg-slate-700" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeSettings()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium">Đóng</button>
+        <button onclick="saveSettings()" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold">Lưu cấu hình</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "bds_agent_api_key";
+    const MODEL_KEY = "bds_agent_model";
+    const PROJECT_KEY = "bds_agent_project";
+
+    let chatHistory = [];
+    let isLoading = false;
+    let recognition = null;
+    let isListening = false;
+
+    const projectSelect = document.getElementById("projectSelect");
+    const chatContainer = document.getElementById("chatContainer");
+    const userInput = document.getElementById("userInput");
+
+    function init() {
+      const knowledge = window.PROJECT_KNOWLEDGE || {};
+      const keys = Object.keys(knowledge);
+      projectSelect.innerHTML = "";
+      keys.forEach((k) => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = knowledge[k].name;
+        projectSelect.appendChild(opt);
+      });
+
+      const savedProj = localStorage.getItem(PROJECT_KEY);
+      if (savedProj && knowledge[savedProj]) {
+        projectSelect.value = savedProj;
+      } else if (knowledge["than_linh"]) {
+        projectSelect.value = "than_linh";
+      }
+
+      projectSelect.addEventListener("change", () => {
+        localStorage.setItem(PROJECT_KEY, projectSelect.value);
+        clearChat();
+      });
+
+      checkApiKeyBadge();
+      renderWelcome();
+    }
+
+    function checkApiKeyBadge() {
+      const hasKey = !!localStorage.getItem(STORAGE_KEY);
+      document.getElementById("keyBadge").classList.toggle("hidden", hasKey);
+    }
+
+    function getCurrentKnowledge() {
+      const knowledge = window.PROJECT_KNOWLEDGE || {};
+      const proj = knowledge[projectSelect.value];
+      return proj ? proj : { name: "Dự án BĐS", content: "Chưa có dữ liệu." };
+    }
+
+    function renderWelcome() {
+      const proj = getCurrentKnowledge();
+      const hasKey = !!localStorage.getItem(STORAGE_KEY);
+      chatContainer.innerHTML = `
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 space-y-2.5 text-sm">
+          <div class="flex items-center gap-2 font-bold text-blue-400">
+            <span>🤖 Trợ lý Pháp lý & Điều hành Dự án</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            Đang nạp hồ sơ chuẩn của <strong>${proj.name}</strong> (${proj.content.length.toLocaleString()} ký tự dữ liệu xác thực).
+          </p>
+          ${!hasKey ? `
+            <div class="bg-amber-950/50 border border-amber-700/60 rounded-xl p-3 text-amber-200 text-xs space-y-1.5">
+              <div>⚠️ <strong>Chưa có API Key Google AI Studio.</strong></div>
+              <button onclick="openSettings()" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-3 py-1.5 rounded-lg mt-1">
+                Nhập API Key ngay
+              </button>
+            </div>
+          ` : `
+            <p class="text-xs text-emerald-400">✅ Đã sẵn sàng nhận lệnh qua Google AI Studio API.</p>
+          `}
+        </div>
+      `;
+    }
+
+    function clearChat() {
+      chatHistory = [];
+      renderWelcome();
+    }
+
+    function openSettings() {
+      document.getElementById("apiKeyInput").value = localStorage.getItem(STORAGE_KEY) || "";
+      document.getElementById("modelSelect").value = "gemini-3.5-flash-lite";
+      document.getElementById("settingsModal").classList.remove("hidden");
+    }
+
+    function closeSettings() {
+      document.getElementById("settingsModal").classList.add("hidden");
+    }
+
+    function saveSettings() {
+      const key = document.getElementById("apiKeyInput").value.trim();
+      const model = "gemini-3.5-flash-lite";
+      if (key) localStorage.setItem(STORAGE_KEY, key);
+      else localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(MODEL_KEY, model);
+      checkApiKeyBadge();
+      closeSettings();
+      if (chatHistory.length === 0) renderWelcome();
+    }
+
+    function loadCustomMd(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const key = projectSelect.value;
+        if (window.PROJECT_KNOWLEDGE && window.PROJECT_KNOWLEDGE[key]) {
+          window.PROJECT_KNOWLEDGE[key].content = e.target.result;
+          alert(`Đã nạp dữ liệu mới từ "${file.name}" vào ${window.PROJECT_KNOWLEDGE[key].name}!`);
+          clearChat();
+        }
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    function autoResize(el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 128) + "px";
+    }
+
+    function handleKeyDown(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(e);
+      }
+    }
+
+    function sendQuick(text) {
+      userInput.value = text;
+      handleSubmit(new Event("submit"));
+    }
+
+    function appendMessage(role, text) {
+      const wrapper = document.createElement("div");
+      wrapper.className = role === "user" ? "flex justify-end" : "flex justify-start";
+
+      const bubble = document.createElement("div");
+      if (role === "user") {
+        bubble.className = "bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%] text-sm shadow";
+        bubble.textContent = text;
+      } else {
+        bubble.className = "bg-slate-800/90 border border-slate-700/80 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[95%] text-sm prose-chat shadow";
+        bubble.innerHTML = marked.parse(text);
+      }
+
+      wrapper.appendChild(bubble);
+      chatContainer.appendChild(wrapper);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return bubble;
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      if (isLoading) return;
+
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      const apiKey = localStorage.getItem(STORAGE_KEY);
+      if (!apiKey) {
+        openSettings();
+        return;
+      }
+
+      userInput.value = "";
+      userInput.style.height = "auto";
+      appendMessage("user", text);
+
+      const loadingBubble = appendMessage("model", "⏳ *Đang tra cứu hồ sơ dự án và phân tích...*");
+      isLoading = true;
+      document.getElementById("sendBtn").disabled = true;
+
+      const proj = getCurrentKnowledge();
+      const systemInstruction = `Bạn là Trợ lý Pháp lý & Điều hành Dự án Bất động sản cao cấp.
+NGUYÊN TẮC BẮT BUỘC:
+1. Chỉ sử dụng dữ liệu thực tế trong HỒ SƠ DỮ LIỆU DỰ ÁN dưới đây để trả lời, phân tích, tra cứu số hiệu văn bản và lập tờ trình/công văn.
+2. Tuyệt đối KHÔNG tự bịa số liệu, số hiệu văn bản hay mốc thời gian không có trong hồ sơ. Nếu không có trong hồ sơ, nói rõ là hồ sơ chưa ghi nhận.
+3. Trả lời bằng tiếng Việt chuyên nghiệp, súc tích, trình bày rõ ràng (dùng gạch đầu dòng hoặc bảng nếu cần) để dễ đọc trên màn hình điện thoại.
+
+=== HỒ SƠ DỮ LIỆU DỰ ÁN: ${proj.name} ===
+${proj.content}`;
+
+      chatHistory.push({ role: "user", parts: [{ text }] });
+
+      const model = "gemini-3.5-flash-lite";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemInstruction }] },
+            contents: chatHistory,
+            generationConfig: { temperature: 0.2 }
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || `HTTP ${res.status}`);
+        }
+
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Không nhận được phản hồi từ mô hình.";
+        chatHistory.push({ role: "model", parts: [{ text: reply }] });
+        loadingBubble.innerHTML = marked.parse(reply);
+      } catch (err) {
+        chatHistory.pop();
+        loadingBubble.innerHTML = `<span class="text-red-400">❌ Lỗi kết nối Google AI Studio: ${err.message}</span>`;
+      } finally {
+        isLoading = false;
+        document.getElementById("sendBtn").disabled = false;
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
+
+    function toggleVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Trình duyệt này chưa hỗ trợ nhập liệu giọng nói. Bạn có thể dùng micro trên bàn phím điện thoại!");
+        return;
+      }
+      if (isListening && recognition) {
+        recognition.stop();
+        return;
+      }
+      recognition = new SpeechRecognition();
+      recognition.lang = "vi-VN";
+      recognition.interimResults = false;
+      recognition.onstart = () => {
+        isListening = true;
+        document.getElementById("micBtn").classList.add("bg-red-600", "text-white");
+      };
+      recognition.onend = () => {
+        isListening = false;
+        document.getElementById("micBtn").classList.remove("bg-red-600", "text-white");
+      };
+      recognition.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        userInput.value = (userInput.value ? userInput.value + " " : "") + transcript;
+        autoResize(userInput);
+      };
+      recognition.start();
+    }
+
+    init();
+  </script>
+</body>
+</html>
