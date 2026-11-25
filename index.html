@@ -172,10 +172,9 @@
     const STORAGE_KEY = "bds_agent_api_key";
     const MODEL_KEY = "bds_agent_model";
     const PROJECT_KEY = "bds_agent_project";
-    const DEFAULT_API_KEY = "AQ.Ab8RN6Lr0rRiPQxW2qsNOLcybEF83-ghanCwS5fpdiOi16llMA";
 
     function getApiKey() {
-      return localStorage.getItem(STORAGE_KEY) || DEFAULT_API_KEY;
+      return localStorage.getItem(STORAGE_KEY) || "";
     }
 
     let chatHistory = [];
@@ -188,6 +187,15 @@
     const userInput = document.getElementById("userInput");
 
     function init() {
+      if (window.location.hash && window.location.hash.includes("key=")) {
+        const params = new URLSearchParams(window.location.hash.slice(1));
+        const hashKey = params.get("key");
+        if (hashKey && hashKey.trim()) {
+          localStorage.setItem(STORAGE_KEY, hashKey.trim());
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+      }
+
       const knowledge = window.PROJECT_KNOWLEDGE || {};
       const keys = Object.keys(knowledge);
       projectSelect.innerHTML = "";
