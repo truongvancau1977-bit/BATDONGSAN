@@ -172,9 +172,10 @@
     const STORAGE_KEY = "bds_agent_api_key";
     const MODEL_KEY = "bds_agent_model";
     const PROJECT_KEY = "bds_agent_project";
+    const DEFAULT_API_KEY = "AQ.Ab8RN6JMrZ8otIZP22Z2f1Vs_pWF0Tn6Np228LncYlC7W8XEvg";
 
     function getApiKey() {
-      return localStorage.getItem(STORAGE_KEY) || "";
+      return localStorage.getItem(STORAGE_KEY) || DEFAULT_API_KEY;
     }
 
     let chatHistory = [];
